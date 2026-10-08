@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cashflow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#"><span class="brand-mark">C</span> CASHFLOW</a>
+        <div class="status"><span></span> Local ledger</div>
+      </header>
+
+      <section id="setupScreen" class="setup-screen">
+        <div class="setup-card">
+          <p class="eyebrow">GET STARTED</p>
+          <h1>How much cash<br />do you manage?</h1>
+          <p class="subtext">Enter the total amount you have. You can distribute it across accounts later.</p>
+          <form id="setupForm">
+            <label for="primaryAmount">TOTAL CASH</label>
+            <div class="money-input"><span>₹</span><input id="primaryAmount" type="number" min="0" step="0.01" placeholder="0.00" required autofocus /></div>
+            <button class="primary-btn" type="submit">Create cash pool <span>→</span></button>
+          </form>
+          <p class="hint">Your data is saved in this browser only.</p>
+        </div>
+      </section>
+
+      <section id="dashboard" class="dashboard hidden">
+        <div class="hero-row">
+          <div>
+            <p class="eyebrow">OVERVIEW</p>
+            <h1>Your cash, clearly managed.</h1>
+          </div>
+          <button class="outline-btn" id="resetButton">Reset data</button>
+        </div>
+
+        <div class="summary-grid">
+          <article class="summary-card total"><div class="card-title-row"><p>Total cash pool</p><button class="edit-pool-button" id="editPoolButton" type="button" aria-label="Edit total cash pool" title="Edit total cash pool">✎</button></div><strong id="totalCash">₹0.00</strong><small>Initial cash amount</small></article>
+          <article class="summary-card"><p>In accounts</p><strong id="allocatedCash">₹0.00</strong><small id="accountCount">0 accounts</small></article>
+          <article class="summary-card remaining"><p>Available to allocate</p><strong id="availableCash">₹0.00</strong><small>Unassigned cash</small></article>
+        </div>
+
+        <div class="action-grid">
+          <section class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">ACCOUNTS</p><h2>Create an account</h2></div></div>
+            <form id="createAccountForm" class="form-stack">
+              <label>ACCOUNT NAME<input id="accountName" type="text" maxlength="40" placeholder="e.g. Home expenses" required /></label>
+              <label>INITIAL AMOUNT <span class="label-note">from available cash</span><div class="inline-money"><span>₹</span><input id="initialAmount" type="number" min="0" step="0.01" value="0" required /></div></label>
+              <button class="primary-btn" type="submit">Create account <span>+</span></button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">MOVE CASH</p><h2>Transfer between accounts</h2></div></div>
+            <form id="transferForm" class="form-stack">
+              <label>FROM<select id="transferFrom" required></select></label>
+              <label>TO<select id="transferTo" required></select></label>
+              <label>AMOUNT<div class="inline-money"><span>₹</span><input id="transferAmount" type="number" min="0.01" step="0.01" placeholder="0.00" required /></div></label>
+              <button class="dark-btn" type="submit">Make transfer <span>→</span></button>
+            </form>
+          </section>
+        </div>
+
+        <section class="accounts-section">
+          <div class="section-heading"><div><p class="eyebrow">YOUR ACCOUNTS</p><h2>Balances</h2></div><div class="account-toolbar"><label class="sort-label">SORT<select id="accountSort"><option value="newest">Newest</option><option value="name">Name A–Z</option><option value="balance-high">Highest balance</option><option value="balance-low">Lowest balance</option></select></label><button class="text-button" id="addMoneyButton">Add money to account</button></div></div>
+          <div id="emptyAccounts" class="empty-state">No accounts yet. Create one above to start allocating your cash.</div>
+          <div id="accountsList" class="accounts-list"></div>
+        </section>
+
+        <section class="charts-section">
+          <div class="section-heading"><div><p class="eyebrow">INSIGHTS</p><h2>Cash overview</h2></div></div>
+          <div class="chart-grid">
+            <article class="chart-card"><h3>Account distribution</h3><div id="distributionChart" class="distribution-chart"></div></article>
+            <article class="chart-card"><h3>Recent cash activity</h3><div id="activityChart" class="activity-chart"></div></article>
+          </div>
+        </section>
+
+        <section class="ledger-section">
+          <div class="section-heading"><div><p class="eyebrow">ACTIVITY</p><h2>Transaction history</h2></div></div>
+          <div class="transaction-filters">
+            <label>SEARCH<input id="filterSearch" type="search" placeholder="Search a transaction" /></label>
+            <label>ACCOUNT<select id="filterAccount"><option value="">All accounts</option></select></label>
+            <label>FROM<input id="filterFromDate" type="date" /></label>
+            <label>TO<input id="filterToDate" type="date" /></label>
+            <label>MIN AMOUNT<input id="filterMinAmount" type="number" min="0" step="0.01" placeholder="0" /></label>
+            <label>MAX AMOUNT<input id="filterMaxAmount" type="number" min="0" step="0.01" placeholder="Any" /></label>
+            <button class="clear-filters-button" id="clearFiltersButton" type="button">Clear filters</button>
+          </div>
+          <div id="emptyLedger" class="empty-state">Your transactions will appear here.</div>
+          <div id="emptyFilteredLedger" class="empty-state hidden">No transactions match these filters.</div>
+          <div id="ledgerList" class="ledger-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="addMoneyDialog">
+      <form id="addMoneyForm" method="dialog">
+        <div class="dialog-top"><div><p class="eyebrow">ALLOCATE CASH</p><h2>Add money to an account</h2></div><button class="close-button" type="button" id="closeDialog">×</button></div>
+        <p class="dialog-subtext">Available in pool: <strong id="dialogAvailable">₹0.00</strong></p>
+        <label>ACCOUNT<select id="addMoneyAccount" required></select></label>
+        <label>AMOUNT<div class="inline-money"><span>₹</span><input id="addMoneyAmount" type="number" min="0.01" step="0.01" placeholder="0.00" required /></div></label>
+        <button class="primary-btn" type="submit">Add money <span>+</span></button>
+      </form>
+    </dialog>
+
+    <dialog id="editPoolDialog">
+      <form id="editPoolForm" method="dialog">
+        <div class="dialog-top"><div><p class="eyebrow">CASH POOL</p><h2>Edit total cash</h2></div><button class="close-button" type="button" id="closeEditPoolDialog">×</button></div>
+        <p class="dialog-subtext">You cannot set this below cash assigned to accounts: <strong id="allocatedMinimum">₹0.00</strong></p>
+        <label>NEW TOTAL CASH<div class="inline-money"><span>₹</span><input id="editPoolAmount" type="number" min="0" step="0.01" required /></div></label>
+        <button class="primary-btn" type="submit">Save total <span>✓</span></button>
+      </form>
+    </dialog>
+
+    <dialog id="editAccountDialog">
+      <form id="editAccountForm" method="dialog">
+        <div class="dialog-top"><div><p class="eyebrow">EDIT ACCOUNT</p><h2>Update account details</h2></div><button class="close-button" type="button" id="closeEditAccountDialog">×</button></div>
+        <input id="editAccountId" type="hidden" />
+        <label>ACCOUNT NAME<input id="editAccountName" type="text" maxlength="40" required /></label>
+        <label>CURRENT BALANCE<div class="inline-money"><span>₹</span><input id="editAccountBalance" type="number" min="0" step="0.01" required /></div></label>
+        <p class="dialog-subtext">Increasing the balance uses money from the main cash pool. Reducing it returns money to the pool.</p>
+        <button class="primary-btn" type="submit">Save changes <span>✓</span></button>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
